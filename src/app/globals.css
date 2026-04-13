@@ -1,26 +1,126 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-nunito: 'Nunito', sans-serif;
+  --color-background: #FAFAF8;
+  --color-foreground: #3C3C3C;
+
+  --color-bee-green: #58CC02;
+  --color-bee-green-dark: #46a302;
+  --color-bee-red: #FF4B4B;
+  --color-bee-red-dark: #d83b3b;
+  --color-bee-orange: #FF9600;
+  --color-bee-purple: #CE82FF;
+  --color-bee-purple-dark: #a55ecc;
+  --color-bee-blue: #1CB0F6;
+  --color-bee-blue-dark: #0f8abf;
+  --color-bee-yellow: #FFC800;
+  --color-bee-pink: #FF86D0;
+  --color-bee-teal: #00CD9C;
+  --color-bee-bg: #FAFAF8;
+
+  --animate-float-around: float-around 20s ease-in-out infinite;
+  --animate-bounce-in: bounce-in 0.5s ease forwards;
+  --animate-shake: shake 0.4s ease;
+  --animate-float-up: float-up 0.8s ease forwards;
+  --animate-wiggle: wiggle 1s ease-in-out infinite;
+  --animate-pulse-glow: pulse-glow 2s ease-in-out infinite;
+  --animate-slide-up: slide-up 0.4s ease forwards;
+  --animate-confetti-drop: confetti-drop 2.5s ease-in forwards;
+  --animate-star-pop: star-pop 0.5s ease forwards;
+  --animate-bee-fly: bee-fly 3s ease-in-out infinite;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+@keyframes float-around {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(30px, -30px) rotate(5deg); }
+  50% { transform: translate(-20px, 20px) rotate(-5deg); }
+  75% { transform: translate(10px, -10px) rotate(3deg); }
+}
+
+@keyframes bounce-in {
+  0% { transform: scale(0.3); opacity: 0; }
+  50% { transform: scale(1.1); opacity: 1; }
+  70% { transform: scale(0.9); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-10px); }
+  40% { transform: translateX(10px); }
+  60% { transform: translateX(-6px); }
+  80% { transform: translateX(4px); }
+}
+
+@keyframes float-up {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-80px) scale(1.5); }
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(88, 204, 2, 0.3); }
+  50% { box-shadow: 0 0 25px rgba(88, 204, 2, 0.6); }
+}
+
+@keyframes slide-up {
+  0% { opacity: 0; transform: translateY(30px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes confetti-drop {
+  0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+@keyframes star-pop {
+  0% { transform: scale(0) rotate(-20deg); opacity: 0; }
+  60% { transform: scale(1.3) rotate(5deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+@keyframes bee-fly {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-15px) rotate(2deg); }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-nunito);
+  background: var(--color-bee-bg);
+  color: var(--color-foreground);
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+
+.btn-chunky {
+  font-weight: 800;
+  border-radius: 1rem;
+  transition: all 0.1s;
+  user-select: none;
+  min-height: 56px;
+  min-width: 56px;
+}
+.btn-chunky:active {
+  transform: translateY(3px);
+  border-bottom-width: 1px;
+}
+
+.pattern-bg {
+  background-image:
+    radial-gradient(circle at 20% 50%, rgba(206,130,255,0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(28,176,246,0.08) 0%, transparent 50%),
+    radial-gradient(circle at 50% 80%, rgba(88,204,2,0.08) 0%, transparent 50%);
+}
+
+.honeycomb-bg {
+  background-color: #FAFAF8;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100'%3E%3Cpath d='M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100' fill='none' stroke='%23f0e8d8' stroke-width='1'/%3E%3Cpath d='M28 0L28 34L0 50L0 84L28 100L56 84L56 50L28 34' fill='none' stroke='%23f0e8d8' stroke-width='1'/%3E%3C/svg%3E");
 }
