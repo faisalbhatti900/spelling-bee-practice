@@ -6,7 +6,7 @@ import { Volume2, MessageSquareText } from 'lucide-react';
 import { type WordItem, wordText, wordDef } from '@/lib/wordBank';
 import { getMeaning } from '@/lib/wordMeanings';
 import { speakSentence, isSpeechAvailable } from '@/lib/speech';
-import { playWord } from '@/lib/wordAudio';
+import { playWord, stopWord } from '@/lib/wordAudio';
 import { playCorrect, playWrong } from '@/lib/sounds';
 import type { PlayResult, WordResult } from './types';
 import WordBankPlayHeader from './WordBankPlayHeader';
@@ -32,10 +32,12 @@ export default function Level1ListenSpell({ items, onComplete, onBack }: Level1P
   const word = wordText(item);
   const total = items.length;
 
-  // Play each new word automatically (clip, then repeated once after 1.5s).
+  // Play each new word automatically (once). Stop audio when the word changes
+  // or we leave, so nothing overlaps with the next word.
   useEffect(() => {
-    playWord(word, true);
+    playWord(word);
     inputRef.current?.focus();
+    return () => stopWord();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idx]);
 

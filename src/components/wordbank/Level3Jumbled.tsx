@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { type WordItem, wordText } from '@/lib/wordBank';
-import { playWord } from '@/lib/wordAudio';
+import { playWord, stopWord } from '@/lib/wordAudio';
 import { playCorrect, playWrong, playClick, playWin } from '@/lib/sounds';
 import { TILE_PALETTE, type PlayResult, type WordResult } from './types';
 import Confetti from './Confetti';
@@ -50,6 +50,9 @@ export default function Level3Jumbled({ items, onComplete, onBack }: Level3Props
   const word = wordText(items[idx]);
   const total = items.length;
   const wordHasSpace = word.includes(' ');
+
+  // Stop any word audio when leaving this level.
+  useEffect(() => () => stopWord(), []);
 
   useEffect(() => {
     const t: Tile[] = word.split('').map((ch, i) => ({ id: i, ch }));

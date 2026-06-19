@@ -9,7 +9,7 @@ import { motion } from 'framer-motion';
 import { Volume2, Pause } from 'lucide-react';
 import ProgressBar from '@/components/ProgressBar';
 import BackButton from '@/components/BackButton';
-import { playWord } from '@/lib/wordAudio';
+import { playWord, stopWord } from '@/lib/wordAudio';
 import { playCorrect, playWrong, playClick } from '@/lib/sounds';
 import type { ExamItem, ExamAnswer } from '@/lib/examStorage';
 
@@ -71,7 +71,7 @@ export default function ExamRunner({
         return t - 1;
       });
     }, 1000);
-    return () => clearInterval(id);
+    return () => { clearInterval(id); stopWord(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idx]);
 

@@ -1,13 +1,16 @@
 'use client';
 
 // ===== WORD AUDIO — pre-generated clips with live-speech fallback =====
-// Each word has a clean, pre-generated clip in /public/audio/<slug>.m4a
-// (made once with a high-quality voice). We play that file for consistent,
-// clear audio on every device. If a clip is missing (not generated yet) or
-// can't play, we fall back to the live Web Speech voice — so the app always
-// has audio and there is never a regression.
+// Plays one clean clip per word from /public/audio/<slug>.m4a, falling back to
+// live Web Speech if a clip is missing.
+//
+// IMPORTANT: only ONE word ever plays at a time. Every play first stops whatever
+// is currently playing (clip + any live speech), so moving to the next word can
+// never overlap with the previous word's audio.
 
-import { speak, speakWord as liveSpeakWord, isSpeechAvailable } from './speech';
+import { speak, cancelSpeech, isSpeechAvailable } from './speech';
+
+let currentAudio: HTMLAudioElement | null = null;
 
 export function wordSlug(word: string): string {
   return word.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -17,33 +20,34 @@ function srcFor(word: string): string {
   return `/audio/${wordSlug(word)}.m4a`;
 }
 
-/**
- * Play a word. With `repeat`, it is said twice (clip plays, then again after
- * 1.5s) to help young spellers — matching the old live behaviour.
- * Falls back to live speech if the clip is unavailable.
- */
-export function playWord(word: string, repeat = false): void {
-  if (typeof window === 'undefined') return;
+/** Stop any word audio currently playing (clip + live speech). */
+export function stopWord(): void {
+  if (currentAudio) {
+    currentAudio.onerror = null;
+    currentAudio.pause();
+    try { currentAudio.currentTime = 0; } catch { /* ignore */ }
+    currentAudio = null;
+  }
+  cancelSpeech();
+}
 
-  const fallback = () => {
-    if (!isSpeechAvailable()) return;
-    if (repeat) liveSpeakWord(word);
-    else speak(word);
-  };
+/** Play a word once. Stops any previous word audio first. */
+export function playWord(word: string): void {
+  if (typeof window === 'undefined') return;
+  stopWord();
 
   let audio: HTMLAudioElement;
   try {
     audio = new Audio(srcFor(word));
   } catch {
-    fallback();
+    if (isSpeechAvailable()) speak(word);
     return;
   }
+  currentAudio = audio;
 
-  if (repeat) {
-    audio.onended = () => {
-      window.setTimeout(() => { audio.play().catch(() => {}); }, 1500);
-    };
-  }
-
-  audio.play().catch(() => fallback());
+  audio.play().catch(() => {
+    // Clip missing / blocked — fall back to live speech, but only if this is
+    // still the word the user is on (avoids a late fallback for an old word).
+    if (currentAudio === audio && isSpeechAvailable()) speak(word);
+  });
 }

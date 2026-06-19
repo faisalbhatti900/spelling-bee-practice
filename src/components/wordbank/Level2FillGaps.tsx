@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { type WordItem, wordText } from '@/lib/wordBank';
-import { playWord } from '@/lib/wordAudio';
+import { playWord, stopWord } from '@/lib/wordAudio';
 import { playCorrect, playWrong, playClick } from '@/lib/sounds';
 import type { PlayResult, WordResult } from './types';
 import WordBankPlayHeader from './WordBankPlayHeader';
@@ -46,6 +46,9 @@ export default function Level2FillGaps({ items, onComplete, onBack }: Level2Prop
 
   const word = wordText(items[idx]);
   const total = items.length;
+
+  // Stop any word audio when leaving this level.
+  useEffect(() => () => stopWord(), []);
 
   useEffect(() => {
     const b = pickBlanks(word);
