@@ -1,7 +1,8 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ArrowLeft, Check, Lock, Trophy, BarChart3, Settings as SettingsIcon } from 'lucide-react';
+import { Check, Lock, Trophy, BarChart3, Settings as SettingsIcon } from 'lucide-react';
+import BackButton from '@/components/BackButton';
 import { LETTERS, TILE_COLORS } from '@/lib/words';
 import { countWords, getCategoryColor } from '@/lib/wordBank';
 import { isLetterComplete, isLetterUnlockedSeq } from '@/lib/wordBankStorage';
@@ -25,12 +26,7 @@ export default function LetterSelect({ category, onPick, onBack, onProgress, onS
   return (
     <div className="relative z-10 max-w-2xl mx-auto px-4 py-6">
       <div className="flex items-center justify-between mb-5">
-        <button
-          onClick={() => { playClick(); onBack(); }}
-          className="flex items-center gap-2 px-4 py-2 bg-white rounded-2xl shadow-md font-extrabold text-gray-600 hover:text-gray-800 transition-colors cursor-pointer min-h-[44px]"
-        >
-          <ArrowLeft className="w-5 h-5" /> Back
-        </button>
+        <BackButton onClick={onBack} />
         <div className="flex items-center gap-2">
           <button
             onClick={() => { playClick(); onProgress(); }}

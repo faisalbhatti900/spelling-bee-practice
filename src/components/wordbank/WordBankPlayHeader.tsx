@@ -1,8 +1,8 @@
 'use client';
 
-import { ArrowLeft, Clock } from 'lucide-react';
+import { Clock } from 'lucide-react';
 import ProgressBar from '@/components/ProgressBar';
-import { playClick } from '@/lib/sounds';
+import BackButton from '@/components/BackButton';
 import { formatTime } from './types';
 
 interface WordBankPlayHeaderProps {
@@ -17,12 +17,7 @@ export default function WordBankPlayHeader({ idx, total, color, elapsedMs, onBac
   return (
     <>
       <div className="flex items-center justify-between mb-4">
-        <button
-          onClick={() => { playClick(); onBack(); }}
-          className="flex items-center gap-2 px-4 py-2 bg-white rounded-2xl shadow-md font-extrabold text-gray-600 hover:text-gray-800 transition-colors cursor-pointer min-h-[44px]"
-        >
-          <ArrowLeft className="w-5 h-5" /> Back
-        </button>
+        <BackButton onClick={onBack} />
         <div
           className="flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-white shadow-md font-black tabular-nums min-h-[44px]"
           style={{ color }}

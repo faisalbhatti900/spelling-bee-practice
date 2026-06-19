@@ -1,7 +1,8 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ArrowLeft, Lock } from 'lucide-react';
+import { Lock } from 'lucide-react';
+import BackButton from '@/components/BackButton';
 import { getCategoryColor } from '@/lib/wordBank';
 import { isLevelUnlocked, getLevelStars } from '@/lib/wordBankStorage';
 import { playClick } from '@/lib/sounds';
@@ -21,14 +22,7 @@ export default function LevelSelect({ category, letter, onPick, onBack }: LevelS
   return (
     <div className="relative z-10 max-w-xl mx-auto px-4 py-6">
       <div className="flex items-center gap-3 mb-6">
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => { playClick(); onBack(); }}
-          className="flex items-center gap-2 px-4 py-2 bg-white rounded-2xl shadow-md font-extrabold text-gray-600 hover:text-gray-800 transition-colors cursor-pointer min-h-[44px]"
-        >
-          <ArrowLeft className="w-5 h-5" /> Back
-        </motion.button>
+        <BackButton onClick={onBack} />
         <h1 className="text-2xl font-black" style={{ color: getCategoryColor(category) }}>
           {category} — Letter {letter}
         </h1>

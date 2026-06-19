@@ -4,8 +4,9 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Save, Trash2 } from 'lucide-react';
+import { Save, Trash2 } from 'lucide-react';
 import FloatingParticles from '@/components/FloatingParticles';
+import BackButton from '@/components/BackButton';
 import { getCategories } from '@/lib/wordBank';
 import { saveProfile, resetProgress, type Profile } from '@/lib/profile';
 import { playClick } from '@/lib/sounds';
@@ -41,12 +42,7 @@ export default function Settings({ initial, onSaved, onBack }: SettingsProps) {
     <div className="min-h-screen pattern-bg relative">
       <FloatingParticles />
       <div className="relative z-10 max-w-md mx-auto px-4 py-6">
-        <button
-          onClick={() => { playClick(); onBack(); }}
-          className="flex items-center gap-2 px-4 py-2 bg-white rounded-2xl shadow-md font-extrabold text-gray-600 hover:text-gray-800 transition-colors cursor-pointer min-h-[44px] mb-5"
-        >
-          <ArrowLeft className="w-5 h-5" /> Back
-        </button>
+        <BackButton onClick={onBack} className="mb-5" />
 
         <motion.h1
           initial={{ opacity: 0, y: 20 }}

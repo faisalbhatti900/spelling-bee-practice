@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Trophy, Star, Target, AlertCircle } from 'lucide-react';
+import { Trophy, Star, Target, AlertCircle } from 'lucide-react';
+import BackButton from '@/components/BackButton';
 import { getCategories, getCategoryColor, getLettersWithCount } from '@/lib/wordBank';
 import { getLevelStars, getLevelProgress, getCategoryStats, getHardWords, type LevelNum } from '@/lib/wordBankStorage';
 import { playClick } from '@/lib/sounds';
@@ -25,12 +26,7 @@ export default function WordBankProgress({ onBack }: WordBankProgressProps) {
 
   return (
     <div className="relative z-10 max-w-2xl mx-auto px-4 py-6">
-      <button
-        onClick={() => { playClick(); onBack(); }}
-        className="flex items-center gap-2 px-4 py-2 bg-white rounded-2xl shadow-md font-extrabold text-gray-600 hover:text-gray-800 transition-colors cursor-pointer min-h-[44px] mb-5"
-      >
-        <ArrowLeft className="w-5 h-5" /> Back
-      </button>
+      <BackButton onClick={onBack} className="mb-5" />
 
       <h1 className="text-3xl font-black text-center text-[#1CB0F6] mb-5">📊 My Progress</h1>
 

@@ -6,8 +6,9 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Volume2, Pause } from 'lucide-react';
+import { Volume2, Pause } from 'lucide-react';
 import ProgressBar from '@/components/ProgressBar';
+import BackButton from '@/components/BackButton';
 import { speak } from '@/lib/speech';
 import { playCorrect, playWrong, playClick } from '@/lib/sounds';
 import type { ExamItem, ExamAnswer } from '@/lib/examStorage';
@@ -94,12 +95,7 @@ export default function ExamRunner({
   return (
     <div className="relative z-10 max-w-xl mx-auto px-4 py-6">
       <div className="flex items-center justify-between mb-4">
-        <button
-          onClick={() => { playClick(); onBack(); }}
-          className="flex items-center gap-2 px-4 py-2 bg-white rounded-2xl shadow-md font-extrabold text-gray-600 hover:text-gray-800 transition-colors cursor-pointer min-h-[44px]"
-        >
-          <ArrowLeft className="w-5 h-5" /> Back
-        </button>
+        <BackButton onClick={onBack} />
         {onPause && (
           <button
             onClick={() => { playClick(); onPause(idx, resultsRef.current); }}
