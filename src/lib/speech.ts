@@ -127,22 +127,6 @@ export async function speakWord(word: string): Promise<void> {
   }, 100);
 }
 
-/** Spell the word out letter by letter with a 0.4s gap: "A … P … P … L … E". */
-export async function spellOut(word: string): Promise<void> {
-  if (!isSpeechAvailable()) return;
-  window.speechSynthesis.cancel();
-  const voice = await ensureVoice();
-  const letters = word.replace(/[^a-zA-Z]/g, '').toUpperCase().split('');
-  let i = 0;
-  const next = () => {
-    if (i >= letters.length) return;
-    const ch = letters[i];
-    i += 1;
-    utter(ch, voice, () => window.setTimeout(next, 400));
-  };
-  window.setTimeout(next, 100);
-}
-
 /** "The word is X. X means <definition>." — definition skipped when unavailable. */
 export async function speakSentence(word: string, def?: string): Promise<void> {
   const sentence = def ? `The word is ${word}. ${word} means ${def}.` : `The word is ${word}.`;

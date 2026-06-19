@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Volume2, MessageSquareText } from 'lucide-react';
 import { type WordItem, wordText, wordDef } from '@/lib/wordBank';
-import { speakWord, speakSentence, spellOut, initVoice, isSpeechAvailable } from '@/lib/speech';
+import { speakWord, speakSentence, initVoice, isSpeechAvailable } from '@/lib/speech';
 import { playCorrect, playWrong } from '@/lib/sounds';
 import type { PlayResult, WordResult } from './types';
 import WordBankPlayHeader from './WordBankPlayHeader';
@@ -87,18 +87,12 @@ export default function Level1ListenSpell({ items, onComplete, onBack }: Level1P
           <p className="mt-1.5 text-[11px] font-semibold text-gray-400">Voice: {voiceLabel}</p>
         )}
 
-        <div className="mt-3 flex flex-wrap items-center justify-center gap-3">
+        <div className="mt-3 flex items-center justify-center">
           <button
             onClick={() => { if (speechOn) speakSentence(word, wordDef(item)); }}
             className="flex items-center gap-2 px-4 py-2 bg-white rounded-2xl shadow-md font-extrabold text-[#CE82FF] hover:brightness-95 transition cursor-pointer min-h-[44px]"
           >
             <MessageSquareText className="w-5 h-5" /> Hear in a sentence
-          </button>
-          <button
-            onClick={() => { if (speechOn) spellOut(word); }}
-            className="flex items-center gap-2 px-4 py-2 bg-white rounded-2xl shadow-md font-extrabold text-[#1CB0F6] hover:brightness-95 transition cursor-pointer min-h-[44px]"
-          >
-            🔤 Spell it
           </button>
         </div>
 
