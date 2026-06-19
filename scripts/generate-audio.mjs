@@ -57,4 +57,10 @@ for (let i = 0; i < list.length; i++) {
   if ((made + skipped) % 100 === 0) console.log(`  ${made + skipped}/${list.length}…`);
 }
 rmSync(tmp, { force: true });
-console.log(`Done. Generated ${made}, skipped ${skipped} existing.`);
+
+// Keep the audio manifest (used by the service worker to pre-cache for offline).
+import { readdirSync, writeFileSync } from 'node:fs';
+const clips = readdirSync(OUT).filter((f) => f.endsWith('.m4a')).sort().map((f) => '/audio/' + f);
+writeFileSync(join(ROOT, 'public', 'audio-manifest.json'), JSON.stringify(clips));
+
+console.log(`Done. Generated ${made}, skipped ${skipped} existing. Manifest: ${clips.length} clips.`);
