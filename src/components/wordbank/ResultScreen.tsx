@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Check, X, RotateCcw, ArrowRight, Grid3x3, Clock, Zap } from 'lucide-react';
 import { playWin, playClick } from '@/lib/sounds';
+import { isLetterComplete } from '@/lib/wordBankStorage';
 import { LEVEL_META, ENCOURAGE, formatTime, type LevelNum, type PlayResult } from './types';
 import StarRating from './StarRating';
 import Confetti from './Confetti';
@@ -19,15 +20,17 @@ interface ResultScreenProps {
   onRetryWrong: (words: string[]) => void;
   onNextLevel: () => void;
   onBackToLetters: () => void;
+  onLetterExam: () => void;
 }
 
 export default function ResultScreen({
-  letter, level, result, stars, isRetry, nextLevel,
-  onRetryWrong, onNextLevel, onBackToLetters,
+  category, letter, level, result, stars, isRetry, nextLevel,
+  onRetryWrong, onNextLevel, onBackToLetters, onLetterExam,
 }: ResultScreenProps) {
   const pct = result.total > 0 ? Math.round((result.score / result.total) * 100) : 0;
   const wrongWords = Array.from(new Set(result.results.filter((r) => !r.correct).map((r) => r.word)));
   const secPerWord = result.total > 0 ? (result.timeMs / 1000 / result.total).toFixed(1) : '0';
+  const letterDone = !isRetry && isLetterComplete(category, letter);
 
   useEffect(() => {
     if (stars >= 5) playWin();
@@ -108,6 +111,15 @@ export default function ResultScreen({
             Next Level <ArrowRight className="w-5 h-5" />
           </button>
         ) : null}
+
+        {letterDone && (
+          <button
+            onClick={() => { playClick(); onLetterExam(); }}
+            className="btn-chunky flex items-center justify-center gap-2 px-6 py-4 bg-[#CE82FF] text-white font-extrabold text-lg border-b-4 border-[#a55ecc] rounded-2xl shadow-md cursor-pointer"
+          >
+            📝 Letter {letter} Exam
+          </button>
+        )}
 
         <button
           onClick={() => { playClick(); onBackToLetters(); }}

@@ -11,10 +11,14 @@ import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import FloatingParticles from '@/components/FloatingParticles';
 import { primeSpeech, isSpeechAvailable } from '@/lib/speech';
-import { getWordItems, wordText, type WordItem } from '@/lib/wordBank';
+import { getWordItems, getWords, wordText, type WordItem } from '@/lib/wordBank';
 import {
   saveLevelProgress, getStars, addWrongWords, type LevelNum,
 } from '@/lib/wordBankStorage';
+import {
+  saveLetterExam, saveFinalResult, getFinalProgress, saveFinalProgress, clearFinalProgress,
+  lettersWithWords, type ExamItem, type ExamAnswer,
+} from '@/lib/examStorage';
 import type { PlayResult, WBScreen } from '@/components/wordbank/types';
 import CategorySelect from '@/components/wordbank/CategorySelect';
 import LetterSelect from '@/components/wordbank/LetterSelect';
@@ -24,6 +28,18 @@ import Level2FillGaps from '@/components/wordbank/Level2FillGaps';
 import Level3Jumbled from '@/components/wordbank/Level3Jumbled';
 import ResultScreen from '@/components/wordbank/ResultScreen';
 import WordBankProgress from '@/components/wordbank/WordBankProgress';
+import ExamRunner from '@/components/wordbank/ExamRunner';
+import ExamResult from '@/components/wordbank/ExamResult';
+import FinalExamResult from '@/components/wordbank/FinalExamResult';
+
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
 
 export default function WordBankContent() {
   const router = useRouter();
@@ -37,6 +53,14 @@ export default function WordBankContent() {
   const [result, setResult] = useState<PlayResult | null>(null);
   const [stars, setStars] = useState(0);
   const [soundPrimed, setSoundPrimed] = useState(false);
+
+  // ===== EXAMS FEATURE — state =====
+  const [examMode, setExamMode] = useState<'letter' | 'final'>('letter');
+  const [examItems, setExamItems] = useState<ExamItem[]>([]);
+  const [examResume, setExamResume] = useState<{ idx: number; results: ExamAnswer[] } | null>(null);
+  const [examAnswers, setExamAnswers] = useState<ExamAnswer[]>([]);
+  const [examStars, setExamStars] = useState(0);
+  const [examKey, setExamKey] = useState(0);
 
   // iOS only allows speech after a user gesture — prime it on the first tap.
   const handleFirstTap = () => {
@@ -70,6 +94,69 @@ export default function WordBankContent() {
     startPlay(level, items, true);
   };
 
+  // ===== EXAMS FEATURE — flow =====
+  const startLetterExam = () => {
+    setExamItems(getWords(category, letter).map((w) => ({ word: w, letter })));
+    setExamResume(null);
+    setExamMode('letter');
+    setExamKey((k) => k + 1);
+    setScreen('letterExam');
+  };
+
+  const buildFinalItems = (letters: string[]): ExamItem[] => {
+    const items: ExamItem[] = [];
+    letters.forEach((l) => getWords(category, l).forEach((w) => items.push({ word: w, letter: l })));
+    return shuffle(items);
+  };
+
+  const startFinalExam = () => {
+    const prog = getFinalProgress(category);
+    if (prog && prog.order?.length) {
+      setExamItems(prog.order);
+      setExamResume({ idx: prog.idx, results: prog.results });
+    } else {
+      setExamItems(buildFinalItems(lettersWithWords(category)));
+      setExamResume(null);
+    }
+    setExamMode('final');
+    setExamKey((k) => k + 1);
+    setScreen('finalExam');
+  };
+
+  const startFinalFresh = (letters: string[]) => {
+    clearFinalProgress(category);
+    setExamItems(buildFinalItems(letters));
+    setExamResume(null);
+    setExamMode('final');
+    setExamKey((k) => k + 1);
+    setScreen('finalExam');
+  };
+
+  const handleExamComplete = (answers: ExamAnswer[]) => {
+    const score = answers.filter((a) => a.correct).length;
+    const total = answers.length;
+    setExamAnswers(answers);
+    if (examMode === 'letter') {
+      setExamStars(saveLetterExam(category, letter, score, total).stars);
+      setScreen('examResult');
+    } else {
+      const perLetter: Record<string, { score: number; total: number }> = {};
+      answers.forEach((a) => {
+        if (!perLetter[a.letter]) perLetter[a.letter] = { score: 0, total: 0 };
+        perLetter[a.letter].total += 1;
+        if (a.correct) perLetter[a.letter].score += 1;
+      });
+      setExamStars(saveFinalResult(category, { score, total, perLetter }).stars);
+      clearFinalProgress(category);
+      setScreen('finalResult');
+    }
+  };
+
+  const handleExamPause = (idx: number, results: ExamAnswer[]) => {
+    saveFinalProgress(category, { order: examItems, idx, results });
+    setScreen('letter');
+  };
+
   const renderPlay = () => {
     const props = { items: playItems, onComplete: handleComplete, onBack: () => setScreen('level') };
     if (level === 1) return <Level1ListenSpell {...props} />;
@@ -93,6 +180,7 @@ export default function WordBankContent() {
             category={category}
             onPick={(l) => { setLetter(l); setScreen('level'); }}
             onBack={() => setScreen('category')}
+            onFinalExam={startFinalExam}
           />
         );
       case 'level':
@@ -119,14 +207,65 @@ export default function WordBankContent() {
             onRetryWrong={retryWrong}
             onNextLevel={() => startPlay((level + 1) as LevelNum, getWordItems(category, letter), false)}
             onBackToLetters={() => setScreen('letter')}
+            onLetterExam={startLetterExam}
           />
         ) : null;
       case 'progress':
         return <WordBankProgress onBack={() => setScreen('category')} />;
+      case 'letterExam':
+        return (
+          <ExamRunner
+            items={examItems}
+            title={`Letter ${letter} Exam — ${category}`}
+            color="#1CB0F6"
+            onComplete={handleExamComplete}
+            onBack={() => setScreen('level')}
+          />
+        );
+      case 'examResult':
+        return (
+          <ExamResult
+            category={category}
+            letter={letter}
+            answers={examAnswers}
+            stars={examStars}
+            onRetry={startLetterExam}
+            onBack={() => setScreen('letter')}
+          />
+        );
+      case 'finalExam':
+        return (
+          <ExamRunner
+            items={examItems}
+            title={`Final Exam — ${category}`}
+            color="#FF9600"
+            showLetterSection
+            showOverallBar
+            initialIdx={examResume?.idx ?? 0}
+            initialResults={examResume?.results}
+            onComplete={handleExamComplete}
+            onPause={handleExamPause}
+            onBack={() => setScreen('letter')}
+          />
+        );
+      case 'finalResult':
+        return (
+          <FinalExamResult
+            category={category}
+            answers={examAnswers}
+            stars={examStars}
+            onRetryFull={() => startFinalFresh(lettersWithWords(category))}
+            onRetryWeak={(weak) => startFinalFresh(weak)}
+            onBack={() => setScreen('letter')}
+          />
+        );
     }
   };
 
-  const animKey = screen === 'play' ? `play-${playKey}` : screen;
+  const animKey =
+    screen === 'play' ? `play-${playKey}`
+      : screen === 'letterExam' || screen === 'finalExam' ? `exam-${examKey}`
+        : screen;
 
   return (
     <div className="min-h-screen pattern-bg relative" onPointerDownCapture={handleFirstTap}>

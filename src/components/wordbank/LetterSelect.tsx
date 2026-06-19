@@ -1,19 +1,25 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ArrowLeft, Check } from 'lucide-react';
+import { ArrowLeft, Check, Star, Pencil, Lock, Trophy } from 'lucide-react';
 import { LETTERS, TILE_COLORS } from '@/lib/words';
 import { countWords, getCategoryColor } from '@/lib/wordBank';
 import { isLetterComplete } from '@/lib/wordBankStorage';
+import { allLettersComplete, getFinalResult, isExamTaken } from '@/lib/examStorage';
 import { playClick } from '@/lib/sounds';
 
 interface LetterSelectProps {
   category: string;
   onPick: (letter: string) => void;
   onBack: () => void;
+  onFinalExam: () => void;
 }
 
-export default function LetterSelect({ category, onPick, onBack }: LetterSelectProps) {
+export default function LetterSelect({ category, onPick, onBack, onFinalExam }: LetterSelectProps) {
+  const finalUnlocked = allLettersComplete(category);
+  const finalBest = getFinalResult(category);
+  const finalPct = finalBest && finalBest.total > 0 ? Math.round((finalBest.score / finalBest.total) * 100) : 0;
+
   return (
     <div className="relative z-10 max-w-2xl mx-auto px-4 py-6">
       <div className="flex items-center gap-3 mb-6">
@@ -40,6 +46,7 @@ export default function LetterSelect({ category, onPick, onBack }: LetterSelectP
           const count = countWords(category, l);
           const hasWords = count > 0;
           const complete = isLetterComplete(category, l);
+          const examDone = complete && isExamTaken(category, l);
 
           return (
             <motion.button
@@ -74,9 +81,40 @@ export default function LetterSelect({ category, onPick, onBack }: LetterSelectP
                   <Check className="w-4 h-4 text-green-500" strokeWidth={3} />
                 </div>
               )}
+              {/* EXAMS FEATURE — exam badge: star if exam taken, pencil if ready to take */}
+              {complete && (
+                <div className="absolute -bottom-1 -left-1 bg-white rounded-full p-0.5 shadow-md">
+                  {examDone
+                    ? <Star className="w-4 h-4 text-[#FFC800]" fill="#FFC800" strokeWidth={1.5} />
+                    : <Pencil className="w-3.5 h-3.5 text-[#CE82FF]" strokeWidth={2.5} />}
+                </div>
+              )}
             </motion.button>
           );
         })}
+      </div>
+
+      {/* ===== EXAMS FEATURE — Final Exam button ===== */}
+      <div className="mt-8 px-2">
+        <motion.button
+          whileHover={finalUnlocked ? { scale: 1.02 } : {}}
+          whileTap={finalUnlocked ? { scale: 0.98 } : {}}
+          onClick={() => { if (finalUnlocked) { playClick(); onFinalExam(); } }}
+          disabled={!finalUnlocked}
+          className={`btn-chunky w-full flex items-center justify-center gap-3 px-6 py-5 rounded-3xl font-black text-lg shadow-lg cursor-pointer disabled:cursor-not-allowed
+            ${finalUnlocked
+              ? 'bg-[#FFC800] text-[#7a5c00] border-b-4 border-[#d9a800] exam-gold-pulse'
+              : 'bg-gray-200 text-gray-400 border-b-4 border-gray-300'}`}
+        >
+          {finalUnlocked
+            ? <><Trophy className="w-6 h-6" /> Final Exam — Are you ready?</>
+            : <><Lock className="w-5 h-5" /> Complete all letters to unlock Final Exam</>}
+        </motion.button>
+        {finalBest && (
+          <p className="text-center text-sm font-bold text-gray-500 mt-2">
+            Best score: {finalBest.score} / {finalBest.total} — {finalPct}%
+          </p>
+        )}
       </div>
     </div>
   );
