@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { type WordItem, wordText } from '@/lib/wordBank';
-import { speak } from '@/lib/speech';
+import { playWord } from '@/lib/wordAudio';
 import { playCorrect, playWrong, playClick, playWin } from '@/lib/sounds';
 import { TILE_PALETTE, type PlayResult, type WordResult } from './types';
 import Confetti from './Confetti';
@@ -86,7 +86,7 @@ export default function Level3Jumbled({ items, onComplete, onBack }: Level3Props
     setPhase('correct');
     playWin();
     playCorrect();
-    setTimeout(() => speak(word), 600); // speak the word after the celebration
+    setTimeout(() => playWord(word), 600); // speak the word after the celebration
     setTimeout(() => finishWord(true), 2100); // then move to the next word
   };
 
@@ -95,7 +95,7 @@ export default function Level3Jumbled({ items, onComplete, onBack }: Level3Props
   const fail = () => {
     setPhase('wrong');
     playWrong();
-    setTimeout(() => speak(word), 700); // say the correct word so the child learns it
+    setTimeout(() => playWord(word), 700); // say the correct word so the child learns it
     setTimeout(() => finishWord(false), 2200); // then advance (no retry)
   };
 

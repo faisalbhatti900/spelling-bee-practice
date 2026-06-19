@@ -9,7 +9,7 @@ import { motion } from 'framer-motion';
 import { Volume2, Pause } from 'lucide-react';
 import ProgressBar from '@/components/ProgressBar';
 import BackButton from '@/components/BackButton';
-import { speak } from '@/lib/speech';
+import { playWord } from '@/lib/wordAudio';
 import { playCorrect, playWrong, playClick } from '@/lib/sounds';
 import type { ExamItem, ExamAnswer } from '@/lib/examStorage';
 
@@ -58,7 +58,7 @@ export default function ExamRunner({
     setInput('');
     setTimeLeft(SECONDS);
     setPlays(1);
-    speak(word);
+    playWord(word);
     inputRef.current?.focus();
     const id = setInterval(() => {
       setTimeLeft((t) => {
@@ -86,7 +86,7 @@ export default function ExamRunner({
   const replay = () => {
     if (plays >= MAX_PLAYS) return;
     playClick();
-    speak(word);
+    playWord(word);
     setPlays((p) => p + 1);
   };
 

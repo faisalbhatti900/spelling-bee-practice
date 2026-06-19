@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { type WordItem, wordText } from '@/lib/wordBank';
-import { speak } from '@/lib/speech';
+import { playWord } from '@/lib/wordAudio';
 import { playCorrect, playWrong, playClick } from '@/lib/sounds';
 import type { PlayResult, WordResult } from './types';
 import WordBankPlayHeader from './WordBankPlayHeader';
@@ -83,7 +83,7 @@ export default function Level2FillGaps({ items, onComplete, onBack }: Level2Prop
       setPhase('correct');
       playCorrect();
       const wasCorrect = !wrongOnce;
-      setTimeout(() => speak(word), 600); // speak the word after the green animation
+      setTimeout(() => playWord(word), 600); // speak the word after the green animation
       setTimeout(() => finishWord(wasCorrect), 2100); // then move on 1.5s later
     } else {
       setPhase('wrong');
