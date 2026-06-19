@@ -6,11 +6,12 @@
 // (kept as one route so it works with Next.js static export and gives
 //  smooth in-app transitions). Each screen lives in components/wordbank/.
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import FloatingParticles from '@/components/FloatingParticles';
 import { primeSpeech, isSpeechAvailable } from '@/lib/speech';
+import { getProfile } from '@/lib/profile';
 import { getWordItems, getWords, wordText, type WordItem } from '@/lib/wordBank';
 import {
   saveLevelProgress, getStars, addWrongWords, type LevelNum,
@@ -20,7 +21,7 @@ import {
   lettersWithWords, type ExamItem, type ExamAnswer,
 } from '@/lib/examStorage';
 import type { PlayResult, WBScreen } from '@/components/wordbank/types';
-import CategorySelect from '@/components/wordbank/CategorySelect';
+import Settings from '@/components/wordbank/Settings';
 import LetterSelect from '@/components/wordbank/LetterSelect';
 import LevelSelect from '@/components/wordbank/LevelSelect';
 import Level1ListenSpell from '@/components/wordbank/Level1ListenSpell';
@@ -43,8 +44,9 @@ function shuffle<T>(arr: T[]): T[] {
 
 export default function WordBankContent() {
   const router = useRouter();
-  const [screen, setScreen] = useState<WBScreen>('category');
-  const [category, setCategory] = useState('');
+  const [screen, setScreen] = useState<WBScreen>('letter');
+  // Client-only component (ssr:false) — read the chosen category at init.
+  const [category, setCategory] = useState<string>(() => getProfile()?.category ?? '');
   const [letter, setLetter] = useState('');
   const [level, setLevel] = useState<LevelNum>(1);
   const [playItems, setPlayItems] = useState<WordItem[]>([]);
@@ -62,6 +64,12 @@ export default function WordBankContent() {
   const [examStars, setExamStars] = useState(0);
   const [examKey, setExamKey] = useState(0);
 
+  // No profile yet? Send the student to onboarding (router.push is a side effect).
+  useEffect(() => {
+    if (!getProfile()) router.push('/');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // iOS only allows speech after a user gesture — prime it on the first tap.
   const handleFirstTap = () => {
     if (soundPrimed) return;
@@ -71,7 +79,7 @@ export default function WordBankContent() {
 
   const startPlay = (lvl: LevelNum, items: WordItem[], retry: boolean) => {
     setLevel(lvl);
-    setPlayItems(items);
+    setPlayItems(shuffle(items)); // new order every time so the student reads each word
     setIsRetry(retry);
     setResult(null);
     setPlayKey((k) => k + 1);
@@ -96,7 +104,7 @@ export default function WordBankContent() {
 
   // ===== EXAMS FEATURE — flow =====
   const startLetterExam = () => {
-    setExamItems(getWords(category, letter).map((w) => ({ word: w, letter })));
+    setExamItems(shuffle(getWords(category, letter).map((w) => ({ word: w, letter }))));
     setExamResume(null);
     setExamMode('letter');
     setExamKey((k) => k + 1);
@@ -166,21 +174,23 @@ export default function WordBankContent() {
 
   const renderScreen = () => {
     switch (screen) {
-      case 'category':
-        return (
-          <CategorySelect
-            onPick={(c) => { setCategory(c); setScreen('letter'); }}
-            onBack={() => router.push('/')}
-            onProgress={() => setScreen('progress')}
-          />
-        );
       case 'letter':
         return (
           <LetterSelect
             category={category}
             onPick={(l) => { setLetter(l); setScreen('level'); }}
-            onBack={() => setScreen('category')}
+            onBack={() => router.push('/')}
+            onProgress={() => setScreen('progress')}
+            onSettings={() => setScreen('settings')}
             onFinalExam={startFinalExam}
+          />
+        );
+      case 'settings':
+        return (
+          <Settings
+            initial={{ name: getProfile()?.name ?? '', category }}
+            onSaved={(p) => { setCategory(p.category); setScreen('letter'); }}
+            onBack={() => setScreen('letter')}
           />
         );
       case 'level':
@@ -211,7 +221,7 @@ export default function WordBankContent() {
           />
         ) : null;
       case 'progress':
-        return <WordBankProgress onBack={() => setScreen('category')} />;
+        return <WordBankProgress onBack={() => setScreen('letter')} />;
       case 'letterExam':
         return (
           <ExamRunner
@@ -266,6 +276,9 @@ export default function WordBankContent() {
     screen === 'play' ? `play-${playKey}`
       : screen === 'letterExam' || screen === 'finalExam' ? `exam-${examKey}`
         : screen;
+
+  // Wait until we've resolved the profile's category (avoids an empty flash).
+  if (!category) return <div className="min-h-screen pattern-bg" />;
 
   return (
     <div className="min-h-screen pattern-bg relative" onPointerDownCapture={handleFirstTap}>

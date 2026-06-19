@@ -5,7 +5,7 @@ import type { LevelNum } from '@/lib/wordBankStorage';
 export type { LevelNum };
 
 export type WBScreen =
-  | 'category' | 'letter' | 'level' | 'play' | 'result' | 'progress'
+  | 'letter' | 'level' | 'play' | 'result' | 'progress' | 'settings'
   | 'letterExam' | 'examResult' | 'finalExam' | 'finalResult';
 
 export interface WordResult {

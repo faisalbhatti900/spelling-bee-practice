@@ -7,6 +7,7 @@
 //   wb_progress_{category}_{letter}_L{level} = { score, total, stars, date }
 //   wb_wrongwords_{category}                  = { word: wrongCount, ... }
 
+import { LETTERS } from './words';
 import { countWords } from './wordBank';
 
 export type LevelNum = 1 | 2 | 3;
@@ -93,6 +94,18 @@ export function getLevelStars(category: string, letter: string, level: LevelNum)
 export function isLetterComplete(category: string, letter: string): boolean {
   if (countWords(category, letter) === 0) return false;
   return [1, 2, 3].every((lvl) => isLevelComplete(category, letter, lvl as LevelNum));
+}
+
+/**
+ * Letters unlock one at a time: the first letter that has words is always open,
+ * and each subsequent letter unlocks only once the previous one is fully complete.
+ */
+export function isLetterUnlockedSeq(category: string, letter: string): boolean {
+  const sequence = LETTERS.filter((l) => countWords(category, l) > 0);
+  const idx = sequence.indexOf(letter);
+  if (idx < 0) return false; // no words for this letter
+  if (idx === 0) return true; // first letter is always open
+  return isLetterComplete(category, sequence[idx - 1]);
 }
 
 // ---- Wrong / hard words ----

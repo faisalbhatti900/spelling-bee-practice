@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { BookOpen, Trophy, BarChart3, Zap, Star, Heart, Sparkles, ArrowRight } from 'lucide-react';
+import { BookOpen, Trophy, BarChart3, Zap, Star, Heart, Sparkles, ArrowRight, ArrowLeft } from 'lucide-react';
 import FloatingParticles from '@/components/FloatingParticles';
 import { playClick } from '@/lib/sounds';
 
@@ -19,6 +19,13 @@ export default function LandingContent() {
   return (
     <div className="min-h-screen pattern-bg relative">
       <FloatingParticles />
+
+      <button
+        onClick={() => { playClick(); router.push('/'); }}
+        className="absolute top-4 left-4 z-20 flex items-center gap-2 px-4 py-2 bg-white rounded-2xl shadow-md font-extrabold text-gray-600 hover:text-gray-800 transition-colors cursor-pointer min-h-[44px]"
+      >
+        <ArrowLeft className="w-5 h-5" /> Back
+      </button>
 
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 pb-8">
         <motion.div
