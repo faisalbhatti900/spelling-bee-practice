@@ -6,7 +6,13 @@ import { useEffect } from 'react';
 
 export default function SWRegister() {
   useEffect(() => {
-    if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return;
+    if (typeof navigator === 'undefined') return;
+
+    // Ask the browser to keep our saved name + progress durable (storage can be
+    // evicted, especially on iOS Safari between visits) — best-effort.
+    navigator.storage?.persist?.().catch(() => {});
+
+    if (!('serviceWorker' in navigator)) return;
 
     // In development, NEVER cache — a stale service worker would serve old code.
     // Actively remove any previously-registered worker and its caches.

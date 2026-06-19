@@ -86,7 +86,7 @@ export default function WelcomeContent() {
           className="text-5xl sm:text-6xl font-black text-center leading-tight"
         >
           <span className="bg-linear-to-r from-[#CE82FF] via-[#1CB0F6] to-[#58CC02] bg-clip-text text-transparent">
-            Word Wizards
+            Spelling Bee
           </span>
         </motion.h1>
 

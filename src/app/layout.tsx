@@ -10,10 +10,10 @@ const nunito = Nunito({
 });
 
 export const metadata: Metadata = {
-  title: "Spelling Bee Practice 🐝",
-  description: "Learn synonyms and antonyms A to Z — a fun vocabulary game for kids!",
+  title: "Spelling Bee 🐝",
+  description: "Learn to spell with fun word practice for kids!",
   manifest: "/manifest.webmanifest",
-  appleWebApp: { capable: true, statusBarStyle: "default", title: "Word Wizards" },
+  appleWebApp: { capable: true, statusBarStyle: "default", title: "Spelling Bee" },
   icons: {
     icon: "/icons/icon-192.png",
     apple: "/icons/apple-touch-icon.png",

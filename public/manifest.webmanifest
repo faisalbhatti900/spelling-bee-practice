@@ -1,6 +1,6 @@
 {
-  "name": "Word Wizards — Spelling Bee",
-  "short_name": "Word Wizards",
+  "name": "Spelling Bee",
+  "short_name": "Spelling Bee",
   "description": "Fun spelling and word practice for kids — works offline.",
   "start_url": "/",
   "scope": "/",
