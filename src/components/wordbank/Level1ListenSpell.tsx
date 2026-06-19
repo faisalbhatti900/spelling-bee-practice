@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Volume2, MessageSquareText } from 'lucide-react';
 import { type WordItem, wordText, wordDef } from '@/lib/wordBank';
-import { speakWord, speakSentence, isSpeechAvailable } from '@/lib/speech';
+import { speakWord, speakSentence, spellOut, initVoice, isSpeechAvailable } from '@/lib/speech';
 import { playCorrect, playWrong } from '@/lib/sounds';
 import type { PlayResult, WordResult } from './types';
 import WordBankPlayHeader from './WordBankPlayHeader';
@@ -25,6 +25,11 @@ export default function Level1ListenSpell({ items, onComplete, onBack }: Level1P
   const inputRef = useRef<HTMLInputElement>(null);
   const speechOn = isSpeechAvailable();
   const { elapsedMs, stop } = useLevelTimer();
+  const [voiceLabel, setVoiceLabel] = useState('');
+
+  useEffect(() => {
+    if (speechOn) initVoice().then(setVoiceLabel);
+  }, [speechOn]);
 
   const item = items[idx];
   const word = wordText(item);
@@ -71,19 +76,31 @@ export default function Level1ListenSpell({ items, onComplete, onBack }: Level1P
       <div className="flex flex-col items-center mt-8">
         <motion.button
           whileTap={{ scale: 0.9 }}
-          onClick={() => { if (speechOn) speakWord(word, false); }}
+          onClick={() => { if (speechOn) speakWord(word); }}
           className="w-20 h-20 rounded-full bg-[#1CB0F6] text-white flex items-center justify-center shadow-lg border-b-4 border-[#0f8abf] animate-pulse-glow cursor-pointer"
-          aria-label="Hear the word again"
+          aria-label="Hear the word"
         >
           <Volume2 className="w-9 h-9" />
         </motion.button>
 
-        <button
-          onClick={() => { if (speechOn) speakSentence(word, wordDef(item)); }}
-          className="mt-4 flex items-center gap-2 px-4 py-2 bg-white rounded-2xl shadow-md font-extrabold text-[#CE82FF] hover:brightness-95 transition cursor-pointer min-h-[44px]"
-        >
-          <MessageSquareText className="w-5 h-5" /> Hear in a sentence
-        </button>
+        {speechOn && voiceLabel && (
+          <p className="mt-1.5 text-[11px] font-semibold text-gray-400">Voice: {voiceLabel}</p>
+        )}
+
+        <div className="mt-3 flex flex-wrap items-center justify-center gap-3">
+          <button
+            onClick={() => { if (speechOn) speakSentence(word, wordDef(item)); }}
+            className="flex items-center gap-2 px-4 py-2 bg-white rounded-2xl shadow-md font-extrabold text-[#CE82FF] hover:brightness-95 transition cursor-pointer min-h-[44px]"
+          >
+            <MessageSquareText className="w-5 h-5" /> Hear in a sentence
+          </button>
+          <button
+            onClick={() => { if (speechOn) spellOut(word); }}
+            className="flex items-center gap-2 px-4 py-2 bg-white rounded-2xl shadow-md font-extrabold text-[#1CB0F6] hover:brightness-95 transition cursor-pointer min-h-[44px]"
+          >
+            🔤 Spell it
+          </button>
+        </div>
 
         {!speechOn && (
           <div className="mt-4 text-center">
@@ -129,7 +146,7 @@ export default function Level1ListenSpell({ items, onComplete, onBack }: Level1P
             <p className="text-4xl font-black text-[#FF4B4B] my-2 tracking-wide">{word}</p>
             <div className="flex gap-3 mt-3">
               <button
-                onClick={() => { setPhase('input'); setInput(''); if (speechOn) speakWord(word, false); inputRef.current?.focus(); }}
+                onClick={() => { setPhase('input'); setInput(''); if (speechOn) speakWord(word); inputRef.current?.focus(); }}
                 className="btn-chunky flex-1 px-5 py-3 bg-white text-gray-700 font-extrabold border-2 border-gray-200 border-b-4 border-b-gray-300 rounded-2xl cursor-pointer"
               >
                 Try again

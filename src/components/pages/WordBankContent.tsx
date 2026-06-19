@@ -10,6 +10,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import FloatingParticles from '@/components/FloatingParticles';
+import { primeSpeech, isSpeechAvailable } from '@/lib/speech';
 import { getWordItems, wordText, type WordItem } from '@/lib/wordBank';
 import {
   saveLevelProgress, getStars, addWrongWords, type LevelNum,
@@ -35,6 +36,14 @@ export default function WordBankContent() {
   const [playKey, setPlayKey] = useState(0);
   const [result, setResult] = useState<PlayResult | null>(null);
   const [stars, setStars] = useState(0);
+  const [soundPrimed, setSoundPrimed] = useState(false);
+
+  // iOS only allows speech after a user gesture — prime it on the first tap.
+  const handleFirstTap = () => {
+    if (soundPrimed) return;
+    primeSpeech();
+    setSoundPrimed(true);
+  };
 
   const startPlay = (lvl: LevelNum, items: WordItem[], retry: boolean) => {
     setLevel(lvl);
@@ -120,8 +129,15 @@ export default function WordBankContent() {
   const animKey = screen === 'play' ? `play-${playKey}` : screen;
 
   return (
-    <div className="min-h-screen pattern-bg relative">
+    <div className="min-h-screen pattern-bg relative" onPointerDownCapture={handleFirstTap}>
       <FloatingParticles />
+
+      {!soundPrimed && isSpeechAvailable() && (
+        <div className="pointer-events-none fixed bottom-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full bg-gray-800/90 text-white text-sm font-bold shadow-lg">
+          🔊 Tap anywhere to enable sound
+        </div>
+      )}
+
       <AnimatePresence mode="wait">
         <motion.div
           key={animKey}
