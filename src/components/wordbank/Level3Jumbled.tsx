@@ -43,7 +43,6 @@ export default function Level3Jumbled({ items, onComplete, onBack }: Level3Props
   const [pool, setPool] = useState<number[]>([]);
   const [answer, setAnswer] = useState<number[]>([]);
   const [phase, setPhase] = useState<'input' | 'correct' | 'wrong'>('input');
-  const [attempts, setAttempts] = useState(0);
   const [typed, setTyped] = useState('');
   const resultsRef = useRef<WordResult[]>([]);
   const { elapsedMs, stop } = useLevelTimer();
@@ -58,10 +57,20 @@ export default function Level3Jumbled({ items, onComplete, onBack }: Level3Props
     setPool(shuffleOrder(t, word));
     setAnswer([]);
     setPhase('input');
-    setAttempts(0);
     setTyped('');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idx]);
+
+  // Auto-check the moment every slot is filled. Driven by an effect (not by the
+  // tap handler) so it's immune to stale `answer` closures and rapid taps — the
+  // old inline check could miss completion and let you keep rearranging.
+  useEffect(() => {
+    if (phase !== 'input' || tiles.length === 0 || answer.length !== tiles.length) return;
+    const built = answer.map((tid) => tiles[tid].ch).join('');
+    const t = setTimeout(() => checkWord(built), 300);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [answer, phase, tiles]);
 
   const finishWord = (correct: boolean) => {
     resultsRef.current.push({ word, correct });
@@ -73,41 +82,33 @@ export default function Level3Jumbled({ items, onComplete, onBack }: Level3Props
     }
   };
 
-  const succeed = (firstTry: boolean) => {
+  const succeed = () => {
     setPhase('correct');
     playWin();
     playCorrect();
     setTimeout(() => speak(word), 600); // speak the word after the celebration
-    setTimeout(() => finishWord(firstTry), 2100); // then move on 1.5s later
+    setTimeout(() => finishWord(true), 2100); // then move to the next word
   };
 
+  // Practice mode: a wrong answer reveals the correct word, says it, then moves
+  // straight on to the next word — we never re-show the same jumble.
   const fail = () => {
-    setAttempts((a) => a + 1);
     setPhase('wrong');
     playWrong();
-    setTimeout(() => {
-      // bounce all tiles back to the jumbled pool
-      setPool((p) => [...p, ...answer]);
-      setAnswer([]);
-      setPhase('input');
-    }, 700);
+    setTimeout(() => speak(word), 700); // say the correct word so the child learns it
+    setTimeout(() => finishWord(false), 2200); // then advance (no retry)
   };
 
   const checkWord = (built: string) => {
-    if (built.toLowerCase() === word.toLowerCase()) succeed(attempts === 0);
+    if (built.toLowerCase() === word.toLowerCase()) succeed();
     else fail();
   };
 
   const placeTile = (id: number) => {
     if (phase !== 'input') return;
     playClick();
-    const nextAnswer = [...answer, id];
-    setAnswer(nextAnswer);
+    setAnswer((prev) => [...prev, id]);
     setPool((p) => p.filter((x) => x !== id));
-    if (nextAnswer.length === tiles.length) {
-      const built = nextAnswer.map((tid) => tiles[tid].ch).join('');
-      setTimeout(() => checkWord(built), 300);
-    }
   };
 
   const returnTile = (id: number) => {
@@ -172,7 +173,12 @@ export default function Level3Jumbled({ items, onComplete, onBack }: Level3Props
         <p className="text-center mt-5 text-2xl font-black text-[#58CC02]">Amazing! You unscrambled it! 🎉</p>
       )}
       {phase === 'wrong' && (
-        <p className="text-center mt-5 text-xl font-black text-[#FF4B4B]">Not quite! Try again 💪</p>
+        <div className="text-center mt-5">
+          <p className="text-xl font-black text-[#FF4B4B]">Not quite!</p>
+          <p className="font-black text-gray-600 mt-1">
+            The word was: <span className="text-[#FF9600] tracking-wide">{word.toUpperCase()}</span>
+          </p>
+        </div>
       )}
 
       {/* Type method (alternative) */}
