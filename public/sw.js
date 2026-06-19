@@ -4,7 +4,8 @@
 // - Audio clips: cache-first, and ALL clips are pre-cached in the background
 //   on activation so every word works fully offline after the first load.
 
-const SHELL = 'wb-shell-v1';
+// Bump SHELL_VERSION on each deploy you want users to pick up immediately.
+const SHELL = 'wb-shell-v2';
 const AUDIO = 'wb-audio-v1';
 
 self.addEventListener('install', () => {

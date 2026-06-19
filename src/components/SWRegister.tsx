@@ -24,7 +24,18 @@ export default function SWRegister() {
       return;
     }
 
-    const register = () => { navigator.serviceWorker.register('/sw.js').catch(() => {}); };
+    // When an updated worker takes control, reload once so a new deploy shows
+    // up automatically (no manual hard-refresh needed).
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (refreshing) return;
+      refreshing = true;
+      window.location.reload();
+    });
+
+    const register = () => {
+      navigator.serviceWorker.register('/sw.js').then((reg) => { reg.update().catch(() => {}); }).catch(() => {});
+    };
     // This component mounts after window 'load' has usually already fired
     // (ssr:false), so register immediately when the document is ready.
     if (document.readyState === 'complete') {
