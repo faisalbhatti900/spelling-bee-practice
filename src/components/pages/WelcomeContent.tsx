@@ -137,6 +137,8 @@ export default function WelcomeContent() {
           Made for young learners
           <Sparkles className="w-4 h-4 text-[#FFC800]" />
         </motion.div>
+
+        <p className="mt-2 text-xs font-bold text-gray-300">v2</p>
       </div>
     </div>
   );
