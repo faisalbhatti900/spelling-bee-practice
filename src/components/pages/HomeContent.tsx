@@ -29,7 +29,7 @@ export default function HomeContent() {
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
-            onClick={() => router.push('/')}
+            onClick={() => router.push('/spelling-bee')}
             className="text-3xl animate-bee-fly cursor-pointer"
           >
             🐝

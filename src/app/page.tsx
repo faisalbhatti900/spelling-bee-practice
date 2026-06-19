@@ -1,5 +1,5 @@
-import { LandingContent } from '@/components/ClientLoader';
+import { WelcomeContent } from '@/components/ClientLoader';
 
-export default function LandingPage() {
-  return <LandingContent />;
+export default function WelcomePage() {
+  return <WelcomeContent />;
 }

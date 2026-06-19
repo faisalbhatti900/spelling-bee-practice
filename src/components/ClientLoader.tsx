@@ -2,7 +2,9 @@
 
 import dynamic from 'next/dynamic';
 
+export const WelcomeContent = dynamic(() => import('@/components/pages/WelcomeContent'), { ssr: false });
 export const LandingContent = dynamic(() => import('@/components/pages/LandingContent'), { ssr: false });
+export const WordBankContent = dynamic(() => import('@/components/pages/WordBankContent'), { ssr: false });
 export const HomeContent = dynamic(() => import('@/components/pages/HomeContent'), { ssr: false });
 export const LearnContent = dynamic(() => import('@/components/pages/LearnContent'), { ssr: false });
 export const QuizContent = dynamic(() => import('@/components/pages/QuizContent'), { ssr: false });
